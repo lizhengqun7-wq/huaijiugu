@@ -8,7 +8,8 @@ const load = name => cache[name] || (cache[name] = fetch(`data/${name}.json`).th
 let N = null; // names.json
 const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const fmt = n => Number(n || 0).toLocaleString('zh-TW');
-const pct = ch => { const p = ch / 10000; return (p >= 1 ? p.toFixed(p >= 10 ? 0 : 1) : p >= 0.01 ? p.toFixed(2) : p.toFixed(4)).replace(/\.?0+$/, '') + '%'; };
+const pct = ch => { const p = ch / 10000; const s = p >= 10 ? p.toFixed(0) : p >= 1 ? p.toFixed(1) : p >= 0.01 ? p.toFixed(2) : p.toFixed(4);
+  return (s.includes('.') ? s.replace(/\.?0+$/, '') : s) + '%'; };
 const img = (kind, id, has, cls = '') => has ? `<img src="img/${kind}/${id}.png" alt="" loading="lazy" class="${cls}">` : '<span class="noimg"></span>';
 
 // ---------- jobs ----------
