@@ -140,6 +140,12 @@ h2::after { content: ""; display: block; width: 56px; height: 5px; border-radius
 .contact h3 { margin: 0 0 6px; }
 .todo { color: var(--value); font-weight: 700; margin: 0; }
 
+.dbgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 14px; }
+.dbcard { padding: 18px 20px; text-decoration: none; border-top: 4px solid var(--accent); transition: transform .15s; }
+.dbcard:hover { transform: translateY(-3px); }
+.dbcard b { display: block; font-size: 1.12rem; }
+.dbcard span { color: var(--muted); font-size: .92rem; }
+
 details {
   background: var(--card); border: 1px solid var(--line); border-radius: 12px;
   padding: 14px 18px; margin: 10px 0; box-shadow: var(--shadow);

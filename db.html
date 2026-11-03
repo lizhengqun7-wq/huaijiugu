@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>懷舊谷資料庫</title>
+<meta name="description" content="懷舊谷遊戲資料庫：道具、道具效果、任務、職業、技能、能力點數、怪物分布、怪物掉落與地圖介紹，資料取自伺服器。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="db.css">
+</head>
+<body class="db">
+
+<header class="nav">
+  <div class="wrap nav-inner">
+    <a class="logo" href="index.html"><span class="leaf">🍁</span>懷舊谷</a>
+    <nav>
+      <a href="index.html">首頁</a>
+      <a href="db.html#items">資料庫</a>
+      <a href="index.html#start">開始遊戲</a>
+    </nav>
+  </div>
+</header>
+
+<div class="tabs-bar">
+  <div class="wrap tabs" id="tabs">
+    <a href="#items" data-tab="items">道具</a>
+    <a href="#quests" data-tab="quests">任務</a>
+    <a href="#jobs" data-tab="jobs">職業</a>
+    <a href="#skills" data-tab="skills">技能</a>
+    <a href="#ap" data-tab="ap">能力點數</a>
+    <a href="#mobs" data-tab="mobs">怪物</a>
+    <a href="#maps" data-tab="maps">地圖</a>
+  </div>
+</div>
+
+<main class="wrap db-main" id="view" aria-live="polite">
+  <p class="loading">資料載入中…</p>
+</main>
+
+<footer class="foot">
+  <div class="wrap">
+    <p><b>懷舊谷</b> ・ 資料庫內容直接取自伺服器設定與遊戲資料</p>
+    <p class="small">掉落機率為伺服器設定值（掉寶倍率 1 倍）；任務獎勵經驗為原始數值。本站為非官方介紹頁，與 NEXON 及遊戲橘子無關。</p>
+  </div>
+</footer>
+
+<script src="db.js"></script>
+</body>
+</html>
