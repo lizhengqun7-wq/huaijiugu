@@ -311,7 +311,7 @@ async function viewQuests() {
     .sort((a, b) => (a.req[0].lvmin || 0) - (b.req[0].lvmin || 0) || a.id - b.id);
   const filters = `<label>我的等級 <input type="search" inputmode="numeric" data-f="lv" value="${esc(st.lv || '')}" style="width:90px" placeholder="不限"></label>`;
   V.innerHTML = listPage({ title: '任務介紹', lead: '任務條件、內容與獎勵。可以輸入等級，只看現在能接的任務。', rows, filters, state: st,
-    render: q => `<a class="row" href="#quest/${q.id}"><span class="tx"><b>${esc(q.n)}</b>
+    render: q => `<a class="row" href="#quest/${q.id}"><span class="ic">${q.req[0].npc ? `<img src="img/npc/${q.req[0].npc}.png" alt="" loading="lazy" onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'noimg'}))">` : '<span class="noimg"></span>'}</span><span class="tx"><b>${esc(q.n)}</b>
       <small>${q.req[0].lvmin ? `Lv.${q.req[0].lvmin} 以上` : '不限等級'}${q.pa ? ' ・ ' + esc(q.pa) : ''}${q.req[0].npc ? ' ・ ' + esc(npcName(q.req[0].npc)) : ''}</small></span></a>` });
   bindList('quests', () => viewQuests()); st.focus = false;
 }
