@@ -1,4 +1,4 @@
-// 懷舊谷資料庫：資料由 tools/export_db.py 從伺服器 wz 與資料庫匯出到 data/*.json
+// 懷舊谷遊戲介紹：資料由 tools/website_export_db.py 從伺服器 wz 與資料庫匯出到 data/*.json（頁面上不顯示任何內部編號）
 'use strict';
 const V = document.getElementById('view');
 const cache = {};
@@ -63,7 +63,7 @@ const FAMILIES = [
 ];
 const JOBNAME = {}; const JOBLV = {}; const JOBFAM = {};
 FAMILIES.forEach(f => f.jobs.forEach(([id, n, lv]) => { JOBNAME[id] = n; JOBLV[id] = lv; JOBFAM[id] = f; }));
-const jobName = id => JOBNAME[id] || (id === 900 || id === 910 ? 'GM' : `職業 ${id}`);
+const jobName = id => JOBNAME[id] || (id === 900 || id === 910 ? 'GM' : '其他職業');
 // 主屬性 / 副屬性（與客戶端「自動分配」4:1 相同）
 const MAINSTAT = [
   ['劍士系（英雄、聖騎士、黑騎士）、聖魂劍士、狂狼勇士、惡魔殺手、米哈逸、打手系、重砲指揮官', '力量', '敏捷'],
@@ -122,16 +122,16 @@ const ELEMV = { 1: '免疫', 2: '抗性', 3: '弱點' };
 const elem = s => (s || '').match(/[A-Z]\d/g)?.map(x => `${ELEM[x[0]] || x[0]}${ELEMV[x[1]] || ''}`).join('、') || '';
 
 // ---------- links ----------
-const itemName = id => N.i[id] || `道具 ${id}`;
-const mobName = id => N.m[id] || `怪物 ${id}`;
-const mapName = id => { const m = N.map[id]; return m ? (m[0] ? `${m[0]}：${m[1]}` : m[1]) : `地圖 ${id}`; };
-const npcName = id => N.p[id] || `NPC ${id}`;
+const itemName = id => N.i[id] || '未知道具';
+const mobName = id => N.m[id] || '未知怪物';
+const mapName = id => { const m = N.map[id]; return m ? (m[0] ? `${m[0]}：${m[1]}` : m[1]) : '特殊地圖'; };
+const npcName = id => N.p[id] || 'NPC';
 const itemLink = (id, extra = '') => `<a class="cell" href="#item/${id}"><img src="img/item/${id}.png" alt="" loading="lazy" onerror="this.remove()"><b>${esc(itemName(id))}</b>${extra}</a>`;
 const mobLink = id => `<a class="cell" href="#mob/${id}"><img src="img/mob/${id}.png" alt="" loading="lazy" onerror="this.remove()"><b>${esc(mobName(id))}</b></a>`;
 const mapLink = id => N.map[id] ? `<a href="#map/${id}">${esc(mapName(id))}</a>` : esc(mapName(id));
 const npcCell = id => `<span class="cell"><img src="img/npc/${id}.png" alt="" loading="lazy" onerror="this.remove()"><b>${esc(npcName(id))}</b></span>`;
-const questLink = id => `<a href="#quest/${id}">${esc(N.q[id] || '任務 ' + id)}</a>`;
-const skillLink = id => `<a class="cell" href="#skill/${id}"><img src="img/skill/${id}.png" alt="" loading="lazy" onerror="this.remove()"><b>${esc(N.s[id] || '技能 ' + id)}</b></a>`;
+const questLink = id => `<a href="#quest/${id}">${esc(N.q[id] || '未知任務')}</a>`;
+const skillLink = id => `<a class="cell" href="#skill/${id}"><img src="img/skill/${id}.png" alt="" loading="lazy" onerror="this.remove()"><b>${esc(N.s[id] || '未知技能')}</b></a>`;
 
 // 遊戲文字中的 #b #k #t道具# #o怪物# #m地圖# #p NPC# 等代碼
 function gameText(s) {
@@ -177,13 +177,13 @@ function listPage({ title, lead, rows, render, filters = '', pageSize = 60, stat
   const page = Math.max(0, state.page || 0), pages = Math.max(1, Math.ceil(rows.length / pageSize));
   const p = Math.min(page, pages - 1);
   return `<h1>${title}</h1><p class="lead2">${lead}</p>
-    <div class="toolbar"><input type="search" id="q" placeholder="搜尋名稱或編號…" value="${esc(state.q || '')}">${filters}
+    <div class="toolbar"><input type="search" id="q" placeholder="搜尋名稱…" value="${esc(state.q || '')}">${filters}
     <span class="count">共 ${fmt(rows.length)} 筆</span></div>
     <div class="list">${rows.slice(p * pageSize, (p + 1) * pageSize).map(render).join('') || '<p class="empty">找不到符合的資料。</p>'}</div>
     ${pages > 1 ? `<div class="pager"><button data-page="${p - 1}" ${p ? '' : 'disabled'}>上一頁</button>
       <span>${p + 1} / ${pages}</span><button data-page="${p + 1}" ${p < pages - 1 ? '' : 'disabled'}>下一頁</button></div>` : ''}`;
 }
-const match = (q, name, id) => !q || String(id) === q || (name || '').toLowerCase().includes(q.toLowerCase());
+const match = (q, name) => !q || (name || '').toLowerCase().includes(q.toLowerCase());
 const state = {};
 function bindList(tab, rerender) {
   const q = V.querySelector('#q');
@@ -232,7 +232,7 @@ async function viewItem(id) {
   if (fx.skills) fxRows.push(['適用技能', fx.skills.map(s => esc(N.s[s] || s)).join('、')]);
   const flags = [st.cash ? '點裝' : '', st.equipTradeBlock ? '裝備後無法交換' : ''].filter(Boolean);
   V.innerHTML = `${back('#items', '道具列表')}<div class="detail"><div class="portrait">${img('item', it.id, it.img, 'icon')}</div><div>
-    <h1>${esc(it.n)}</h1><p class="lead2">${itemCat(it.id)} ・ 編號 ${it.id}${flags.map(f => `<span class="badge">${f}</span>`).join('')}</p>
+    <h1>${esc(it.n)}</h1><p class="lead2">${itemCat(it.id)}${flags.map(f => `<span class="badge">${f}</span>`).join('')}</p>
     ${it.d ? `<div class="desc qt">${gameText(it.d)}</div>` : ''}
     ${stats.length ? `<h2>道具能力</h2>${kv(stats)}` : ''}
     ${fxRows.length ? `<h2>道具功能</h2>${kv(fxRows)}` : ''}
@@ -251,8 +251,8 @@ async function viewMobs() {
   const st = state.mobs ||= { page: 0, sort: 'lv' };
   const mobs = await load('mobs');
   const rows = Object.values(mobs).filter(m => match(st.q, m.n, m.id) && (!st.boss || m.boss) && (!st.spawn || m.maps.length))
-    .sort((a, b) => st.sort === 'lv' ? (a.lv || 0) - (b.lv || 0) || a.id - b.id : st.sort === 'exp' ? (b.exp || 0) - (a.exp || 0) : a.id - b.id);
-  const filters = `<select data-f="sort"><option value="lv" ${st.sort === 'lv' ? 'selected' : ''}>依等級</option><option value="exp" ${st.sort === 'exp' ? 'selected' : ''}>依經驗值</option><option value="id" ${st.sort === 'id' ? 'selected' : ''}>依編號</option></select>
+    .sort((a, b) => st.sort === 'lv' ? (a.lv || 0) - (b.lv || 0) || a.id - b.id : st.sort === 'exp' ? (b.exp || 0) - (a.exp || 0) : (b.hp || 0) - (a.hp || 0));
+  const filters = `<select data-f="sort"><option value="lv" ${st.sort === 'lv' ? 'selected' : ''}>依等級</option><option value="exp" ${st.sort === 'exp' ? 'selected' : ''}>依經驗值</option><option value="hp" ${st.sort === 'hp' ? 'selected' : ''}>依 HP</option></select>
     <label><input type="checkbox" data-f="spawn" ${st.spawn ? 'checked' : ''}>只看地圖上有出現的</label>
     <label><input type="checkbox" data-f="boss" ${st.boss ? 'checked' : ''}>只看 BOSS</label>`;
   V.innerHTML = listPage({ title: '怪物介紹', lead: '怪物能力、出現地圖（怪物分布）與掉落物。', rows, filters, state: st,
@@ -265,7 +265,7 @@ async function viewMob(id) {
   if (!m) return notFound('怪物');
   const meso = m.drops.filter(d => d[0] === 0), items = m.drops.filter(d => d[0] !== 0);
   V.innerHTML = `${back('#mobs', '怪物列表')}<div class="detail"><div class="portrait">${img('mob', m.id, m.img)}</div><div>
-    <h1>${esc(m.n)}${m.boss ? '<span class="badge boss">BOSS</span>' : ''}</h1><p class="lead2">編號 ${m.id}</p>
+    <h1>${esc(m.n)}${m.boss ? '<span class="badge boss">BOSS</span>' : ''}</h1><p class="lead2">Lv.${m.lv || '?'}${m.maps.length ? ` ・ 出現在 ${m.maps.length} 張地圖` : ''}</p>
     ${kv([['等級', m.lv], ['HP', fmt(m.hp)], ['MP', fmt(m.mp)], ['經驗值', fmt(m.exp)], ['物理攻擊', fmt(m.pad)], ['魔法攻擊', fmt(m.mad)],
       ['物理防禦率', m.pdr != null ? m.pdr + '%' : ''], ['魔法防禦率', m.mdr != null ? m.mdr + '%' : ''], ['命中', m.acc], ['迴避', m.eva],
       ['屬性', elem(m.elem)], ['不死系', m.undead ? '是' : ''], ['主動攻擊', m.fa ? '是' : '']])}
@@ -294,7 +294,7 @@ async function viewMap(id) {
   const m = maps[id];
   if (!m) return notFound('地圖');
   V.innerHTML = `${back('#maps', '地圖列表')}<h1>${esc(m.n)}${m.town ? '<span class="badge">村莊</span>' : ''}</h1>
-    <p class="lead2">${esc(m.s)} ・ 編號 ${m.id}</p>
+    <p class="lead2">${esc(m.s)}</p>
     ${m.d ? `<div class="desc">${esc(m.d)}</div>` : ''}
     ${m.mm ? `<h2>小地圖</h2><img class="minimap" src="img/map/${m.id}.png" alt="${esc(m.n)} 小地圖" loading="lazy">` : ''}
     ${kv([['回城地圖', m.ret ? mapLink(m.ret) : '']])}
@@ -347,7 +347,7 @@ async function viewQuest(id) {
   const q = (await load('quests'))[id];
   if (!q) return notFound('任務');
   const [t0, t1, t2] = q.t;
-  V.innerHTML = `${back('#quests', '任務列表')}<h1>${esc(q.n)}</h1><p class="lead2">${q.pa ? esc(q.pa) + ' ・ ' : ''}編號 ${q.id}${q.auto ? '<span class="badge">自動開始</span>' : ''}</p>
+  V.innerHTML = `${back('#quests', '任務列表')}<h1>${esc(q.n)}</h1><p class="lead2">${q.pa ? esc(q.pa) : '任務'}${q.auto ? '<span class="badge">自動開始</span>' : ''}</p>
     ${t0 || t1 ? `<div class="desc qt">${gameText(t0 || t1)}</div>` : ''}
     <h2>開始條件</h2>${reqBlock(q.req[0], 0) || '<p class="empty">沒有特別條件。</p>'}
     <h2>完成條件</h2>${reqBlock(q.req[1], 1) || '<p class="empty">沒有特別條件。</p>'}
@@ -392,7 +392,7 @@ async function viewSkill(id) {
   if (!s) return notFound('技能');
   const max = Math.max(1, s.max || 1);
   V.innerHTML = `${back('#job/' + s.job, jobName(s.job) + ' 的技能')}<div class="detail"><div class="portrait">${img('skill', s.id, s.img, 'icon')}</div><div>
-    <h1>${esc(s.n)}</h1><p class="lead2">${esc(jobName(s.job))} ・ 最高 ${s.max || '-'} 級${s.ml ? `（未使用精通書時上限 ${s.ml} 級）` : ''} ・ 編號 ${s.id}</p>
+    <h1>${esc(s.n)}</h1><p class="lead2">${esc(jobName(s.job))} ・ 最高 ${s.max || '-'} 級${s.ml ? `（未使用精通書時上限 ${s.ml} 級）` : ''}</p>
     ${s.d ? `<div class="desc qt">${gameText(s.d)}</div>` : ''}
     ${s.req ? `<p>前置技能：${Object.entries(s.req).map(([k, v]) => `${skillLink(+k)} Lv.${v}`).join('、')}</p>` : ''}
     ${s.h || s.hl ? `<h2>等級效果</h2><div class="lvbar"><label for="lv">等級 <b id="lvv">1</b></label><input type="range" id="lv" min="1" max="${max}" value="1"></div>
@@ -438,7 +438,7 @@ async function route(keepFocus) {
     if (!N) N = await load('names');
     if (state[tab]) state[tab].focus = keepFocus === true;
     await fn(arg !== undefined ? +arg : undefined);
-    const h = V.querySelector('h1'); document.title = (h ? h.textContent + '｜' : '') + '懷舊谷資料庫';
+    const h = V.querySelector('h1'); document.title = (h ? h.textContent + '｜' : '') + '懷舊谷';
   } catch (e) { V.innerHTML = `<p class="empty">資料載入失敗，請重新整理頁面。（${esc(e.message)}）</p>`; }
 }
 addEventListener('hashchange', () => { route(); scrollTo(0, 0); });
